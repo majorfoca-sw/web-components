@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        background: #fafafa;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="demo"></div>
+
+    <script type="module">
+      import { html, render } from 'lit';
+      import '../firebase-loginbutton.js';
+
+      render(
+        html` <div class="demo-main">
+          <div class="demo-main__item">
+            <h1>Example 1</h1>
+            <h2>Default button</h2>
+            <firebase-loginbutton
+              id="btn1"
+              api-key="AIzaSyCVpVjyqS9qNcTsTDuQ8qBL1i4VPy5CdpY"
+              domain="coleccion-peliculas"
+              messaging-sender-id="852819704247"
+              app-id="1:852819704247:web:9ac0a093401920ed"
+            >
+            </firebase-loginbutton>
+          </div>
+
+          <div class="demo-main__item">
+            <h1>Example 2</h1>
+            <h2
+              title="Into console write 'document.getElementById('btn2')auth.signOut()' to logout"
+            >
+              Default button. Hidden when login
+            </h2>
+            <firebase-loginbutton
+              id="btn2"
+              api-key="AIzaSyCVpVjyqS9qNcTsTDuQ8qBL1i4VPy5CdpY"
+              domain="coleccion-peliculas"
+              messaging-sender-id="852819704247"
+              app-id="1:852819704247:web:9ac0a093401920ed"
+              hide-if-login
+            >
+            </firebase-loginbutton>
+          </div>
+
+          <div class="demo-main__item">
+            <h1>Example 3</h1>
+            <h2>Default style variables. Show icon, photo, email and name</h2>
+            <firebase-loginbutton
+              id="btn3"
+              api-key="AIzaSyCVpVjyqS9qNcTsTDuQ8qBL1i4VPy5CdpY"
+              domain="coleccion-peliculas"
+              messaging-sender-id="852819704247"
+              app-id="1:852819704247:web:9ac0a093401920ed"
+              show-email
+              show-icon
+              show-user
+              show-photo
+            >
+            </firebase-loginbutton>
+          </div>
+
+          <div class="demo-main__item">
+            <h1>Example 4</h1>
+            <h2>Redefined style variables. Show photo, email and name</h2>
+            <style>
+              #btn4 {
+                --btn-primary-color: rgb(231, 179, 179);
+                --btn-background-color: rgb(41, 37, 255);
+                --btn-secondary-color: white;
+                --btn-text-user-color: rgb(11, 22, 22);
+                --icon-bg-color-singin: #fa0;
+                --icon-bg-color-singout: #0aa;
+              }
+            </style>
+            <firebase-loginbutton
+              id="btn4"
+              api-key="AIzaSyCVpVjyqS9qNcTsTDuQ8qBL1i4VPy5CdpY"
+              domain="coleccion-peliculas"
+              messaging-sender-id="852819704247"
+              app-id="1:852819704247:web:9ac0a093401920ed"
+              show-email
+              show-user
+              show-photo
+            >
+            </firebase-loginbutton>
+          </div>
+        </div>`,
+        document.querySelector('#demo')
+      );
+    </script>
+  </body>
+</html>
