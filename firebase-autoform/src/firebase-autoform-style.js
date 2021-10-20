@@ -1,6 +1,6 @@
 import { css } from 'lit';
 
-export const firebaseLoginbuttonStyles = css`
+export const firebaseAutoformStyles = css`
   :host,
   :root {
     display: block;

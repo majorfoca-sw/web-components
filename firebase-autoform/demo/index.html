@@ -1,29 +1,38 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en-GB">
-<head>
-  <meta charset="utf-8">
-  <style>
-    body {
-      background: #fafafa;
-    }
-  </style>
-</head>
-<body>
-  <div id="demo"></div>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        background: #fafafa;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="demo"></div>
 
-  <script type="module">
-    import { html, render } from 'lit';
-    import '../firebase-autoform.js';
+    <script type="module">
+      import { html, render } from 'lit';
+      import '../firebase-autoform.js';
+      import 'firebase-loginbutton';
 
-    const title = 'Hello owc World!';
-    render(
-      html`
-        <firebase-autoform .title=${title}>
-          some light-dom
-        </firebase-autoform>
-      `,
-      document.querySelector('#demo')
-    );
-  </script>
-</body>
+      render(
+        html`
+          <firebase-loginbutton
+            id="btn1"
+            api-key="AIzaSyCVpVjyqS9qNcTsTDuQ8qBL1i4VPy5CdpY"
+            domain="coleccion-peliculas"
+            messaging-sender-id="852819704247"
+            app-id="1:852819704247:web:9ac0a093401920ed"
+          >
+            ></firebase-loginbutton
+          >
+          <firebase-autoform id="demo" path="/peliculas">
+            some light-dom
+          </firebase-autoform>
+        `,
+        document.querySelector('#demo')
+      );
+    </script>
+  </body>
 </html>

@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import { html, LitElement } from 'lit';
 import { initializeApp } from 'firebase/app';
 import {
@@ -128,17 +129,12 @@ export class FirebaseLoginbutton extends LitElement {
     if (super.connectedCallback) {
       super.connectedCallback();
     }
-    document.addEventListener('firebase-are-you-logged', this._dispatchSignin);
   }
 
   disconnectedCallback() {
     if (super.disconnectedCallback) {
       super.disconnectedCallback();
     }
-    document.removeEventListener(
-      'firebase-are-you-logged',
-      this._dispatchSignin
-    );
   }
 
   firstUpdated() {
@@ -166,11 +162,12 @@ export class FirebaseLoginbutton extends LitElement {
     );
   }
 
+  // eslint-disable-next-line class-methods-use-this
   _addGlobalEvent(eventName, detail) {
-    if (!global.EventsDispatched) {
-      global.EventsDispatched = {};
+    if (!globalThis.EventsDispatched) {
+      globalThis.EventsDispatched = {};
     }
-    global.EventsDispatched[eventName] = detail;
+    globalThis.EventsDispatched[eventName] = detail;
   }
 
   _dispatchSignin() {
@@ -355,6 +352,7 @@ export class FirebaseLoginbutton extends LitElement {
         this._drawButtonLogout();
       }
       this._checkEventsLogin(user);
+      this._dispatchSignin();
     });
   }
 
@@ -374,13 +372,13 @@ export class FirebaseLoginbutton extends LitElement {
     return html`
       <section class="wrapper__layer--login">
         ${this.hasParams
-          ? html`
+        ? html`
               <div id="user" class="wrapper__user"></div>
               <button disabled id="quickstart-sign-in" title="${this.infobtn}">
                 <div class="button-text"></div>
               </button>
             `
-          : html` <p>Faltan parámetros en la definición del componente</p> `}
+        : html` <p>Faltan parámetros en la definición del componente</p> `}
       </section>
     `;
   }
