@@ -31,6 +31,7 @@ export class FirebaseAutoform extends LitElement {
 
     this.fn = {
       string: this._createTextField.bind(this),
+      text: this._createTextareaField.bind(this),
       number: this._createTextField.bind(this),
       date: this._createTextField.bind(this),
       boolean: this._createTextField.bind(this),
@@ -61,6 +62,32 @@ export class FirebaseAutoform extends LitElement {
     }
   }
 
+  _createTextareaField(modelElementName, bFieldMultiple = false) {
+    const label = document.createElement('label');
+    label.setAttribute('for', modelElementName);
+    label.innerHTML = modelElementName;
+    const textarea = document.createElement('textarea');
+    textarea.classList.add('form-control');
+    textarea.setAttribute('name', modelElementName);
+    textarea.setAttribute('id', modelElementName);
+    textarea.setAttribute('rows', '5');
+    textarea.setAttribute('placeholder', modelElementName);
+    textarea.innerHTML = '';
+    textarea.addEventListener('change', e => {
+      this.model[modelElementName] = e.target.value;
+      if (this.autoSave) {
+        this.save();
+      }
+    });
+    const divLayer = document.createElement('div');
+    divLayer.classList.add('form-group');
+    divLayer.appendChild(label);
+    divLayer.appendChild(textarea);
+    this._drawMultiple(bFieldMultiple, modelElementName, divLayer);
+    this.container.appendChild(divLayer);
+  }
+
+
   _createTextField(modelElementName, bFieldMultiple = false) {
     const label = document.createElement('label');
     label.setAttribute('for', modelElementName);
@@ -70,6 +97,7 @@ export class FirebaseAutoform extends LitElement {
     input.setAttribute('name', modelElementName);
     input.setAttribute('id', modelElementName);
     input.setAttribute('value', '');
+    input.classList.add('form-control');
     input.addEventListener('change', e => {
       this.model[modelElementName] = e.target.value;
       if (this.autoSave) {
@@ -77,7 +105,7 @@ export class FirebaseAutoform extends LitElement {
       }
     });
     const divLayer = document.createElement('div');
-    divLayer.setAttribute('class', 'layer');
+    divLayer.classList.add('form-group');
     divLayer.appendChild(label);
     divLayer.appendChild(input);
     this._drawMultiple(bFieldMultiple, modelElementName, divLayer);
@@ -91,6 +119,7 @@ export class FirebaseAutoform extends LitElement {
     const select = document.createElement('select');
     select.setAttribute('name', modelElementName);
     select.setAttribute('id', modelElementName);
+    select.classList.add('form-control');
     select.addEventListener('change', e => {
       this.model[modelElementName] = e.target.value;
       if (this.autoSave) {
@@ -108,7 +137,7 @@ export class FirebaseAutoform extends LitElement {
       select.appendChild(option);
     });
     const divLayer = document.createElement('div');
-    divLayer.setAttribute('class', 'layer');
+    divLayer.classList.add('form-group');
     divLayer.appendChild(label);
     divLayer.appendChild(select);
     this._drawMultiple(bFieldMultiple, modelElementName, divLayer);
@@ -132,6 +161,7 @@ export class FirebaseAutoform extends LitElement {
     const modelElement = this.model[modelElementName];
     const addButton = document.createElement('button');
     addButton.innerHTML = 'Add';
+    addButton.classList.add('btn', 'btn-primary');
     addButton.addEventListener('click', () => {
       // model.push({});
       console.log(modelElement);
@@ -182,10 +212,16 @@ export class FirebaseAutoform extends LitElement {
   }
   
   _drawMainFieldGroups(group) {
-    const groupKeys = Object.keys(group);
-    groupKeys.forEach((groupKey) => {
-      const fieldsetName = group[groupKey];
-      console.log(groupKey, fieldsetName);
+    this.groupKeys = [];
+    this.groupsObj = {};
+    group.forEach((item) => {
+      this.groupKeys.push(Object.keys(item)[0]);
+      // eslint-disable-next-line prefer-destructuring
+      this.groupsObj[Object.keys(item)[0]] = Object.values(item)[0];
+    });
+    this.groupKeys.forEach((groupKey) => {
+      const fieldsetName = this.groupsObj[groupKey];
+      // console.log(groupKey, fieldsetName);
       const fieldset = this._getFieldset(groupKey);
       this.container.appendChild(fieldset);
     });
@@ -198,8 +234,8 @@ export class FirebaseAutoform extends LitElement {
       const bFieldMultiple = (fieldData[1] === 'array') || (fieldData[1] !== undefined && _bFieldMultiple);
       // console.log(modelElementName, fieldType, bFieldMultiple);
       if (groups.constructor.name === "Object") {
-        this.groupKeys = Object.keys(groups);
-        this.groupKeys.forEach((groupKey) => {
+        const groupKeys = Object.keys(groups);
+        groupKeys.forEach((groupKey) => {
           if (groups[groupKey].includes(modelElementName)) {
             const groupContainer = (parseInt(groupKey, 10) != groupKey) ? this.container.querySelector(`#${groupKey}`) : this.container.querySelector(`#group_${groupKey}`);
             this.container = groupContainer;
@@ -220,7 +256,7 @@ export class FirebaseAutoform extends LitElement {
     const groups = this.groups[path];
     this.pathName = path;
     this._drawMainFieldGroups(groups);
-    this._drawFormFieldsModel(model, groups);
+    this._drawFormFieldsModel(model, this.groupsObj);
   }
 
   async _generateForm() {
@@ -246,10 +282,8 @@ export class FirebaseAutoform extends LitElement {
 
   render() {
     return html`
-      <form id="form-${this.id}">
-        <div class="container 100%">
-        </div>
-      </form>
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" />
+      <form id="form-${this.id}" class="container 100%"></form>
     `;
   }
 }
