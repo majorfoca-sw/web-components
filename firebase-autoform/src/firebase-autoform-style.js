@@ -17,12 +17,19 @@ export const firebaseAutoformStyles = css`
     padding: 0;
     margin-top: 0.5rem;
     font-size: 1.2rem;
+    width: 15%;
   }
 
   .form-group {
     display: inline-flex;
     flex-wrap: wrap;
-    justify-content: space-between;
+    justify-content: flex-start;
+    width: 60rem;
+    margin: 1rem 0;
+  }
+
+  .form-control {
+    width: 75%;
     margin: 0 1rem;
   }
 `;
