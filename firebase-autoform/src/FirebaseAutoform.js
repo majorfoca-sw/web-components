@@ -1,5 +1,6 @@
 import { html, LitElement } from 'lit';
 import { getDatabase, ref, onValue } from 'firebase/database';
+import { ValidateForm } from 'automatic_form_validation';
 import { firebaseAutoformStyles } from './firebase-autoform-style.js';
 
 export class FirebaseAutoform extends LitElement {
@@ -23,6 +24,7 @@ export class FirebaseAutoform extends LitElement {
 
     this.model = {};
     this.groups = {};
+    this.info = {};
     this.data = {};
     this.user = null;
     this.firebaseApp = null;
@@ -31,12 +33,15 @@ export class FirebaseAutoform extends LitElement {
 
     this.fn = {
       string: this._createTextField.bind(this),
+      password: this._createTextField.bind(this),
       text: this._createTextareaField.bind(this),
       number: this._createTextField.bind(this),
       date: this._createTextField.bind(this),
-      boolean: this._createTextField.bind(this),
+      boolean: this._createRadioButtonField.bind(this),
       model: this._createModelFields.bind(this),
     };
+
+    this.htmlInputAttributes = ['maxlength', 'minlength', 'size', 'max', 'min', 'step', 'pattern', 'placeholder'];
   }
 
   connectedCallback() {
@@ -52,162 +57,12 @@ export class FirebaseAutoform extends LitElement {
       super.firstUpdated();
     }
     this.id = this.id || `firebase-autoform-${new Date().getTime()}`;
+    document.addEventListener('click', this._hideBocadillo.bind(this));
     this.container = this.shadowRoot.querySelector('.container');
+    this._createBocadillo();
   }
 
-  _drawMultiple(bFieldMultiple, modelElementName, divLayer) {
-    if (bFieldMultiple) {
-      const addButton = this._createAddBtn(modelElementName);
-      divLayer.appendChild(addButton);
-    }
-  }
-
-  _createTextareaField(modelElementName, bFieldMultiple = false) {
-    const label = document.createElement('label');
-    label.setAttribute('for', modelElementName);
-    label.innerHTML = modelElementName;
-    const textarea = document.createElement('textarea');
-    textarea.classList.add('form-control');
-    textarea.setAttribute('name', modelElementName);
-    textarea.setAttribute('id', modelElementName);
-    textarea.setAttribute('rows', '5');
-    textarea.setAttribute('placeholder', modelElementName);
-    textarea.innerHTML = '';
-    textarea.addEventListener('change', e => {
-      this.model[modelElementName] = e.target.value;
-      if (this.autoSave) {
-        this.save();
-      }
-    });
-    const divLayer = document.createElement('div');
-    divLayer.classList.add('form-group');
-    divLayer.appendChild(label);
-    divLayer.appendChild(textarea);
-    this._drawMultiple(bFieldMultiple, modelElementName, divLayer);
-    this.container.appendChild(divLayer);
-  }
-
-  _createTextField(modelElementName, bFieldMultiple = false) {
-    const label = document.createElement('label');
-    label.setAttribute('for', modelElementName);
-    label.innerHTML = modelElementName;
-    const input = document.createElement('input');
-    input.setAttribute('type', 'text');
-    input.setAttribute('name', modelElementName);
-    input.setAttribute('id', modelElementName);
-    input.setAttribute('value', '');
-    input.classList.add('form-control');
-    input.addEventListener('change', e => {
-      this.model[modelElementName] = e.target.value;
-      if (this.autoSave) {
-        this.save();
-      }
-    });
-    const divLayer = document.createElement('div');
-    divLayer.classList.add('form-group');
-    divLayer.appendChild(label);
-    divLayer.appendChild(input);
-    this._drawMultiple(bFieldMultiple, modelElementName, divLayer);
-    this.container.appendChild(divLayer);
-  }
-
-  _createSelectField(model, modelElementName, bFieldMultiple = false) {
-    const label = document.createElement('label');
-    label.setAttribute('for', modelElementName);
-    label.innerHTML = modelElementName;
-    const select = document.createElement('select');
-    select.setAttribute('name', modelElementName);
-    select.setAttribute('id', modelElementName);
-    select.classList.add('form-control');
-    select.addEventListener('change', e => {
-      this.model[modelElementName] = e.target.value;
-      if (this.autoSave) {
-        this.save();
-      }
-    });
-    const optionDefault = document.createElement('option');
-    optionDefault.setAttribute('value', '');
-    optionDefault.innerHTML = 'Selecciona una opción';
-    select.appendChild(optionDefault);
-    model.forEach(item => {
-      const option = document.createElement('option');
-      option.setAttribute('value', item);
-      option.innerHTML = item;
-      select.appendChild(option);
-    });
-    const divLayer = document.createElement('div');
-    divLayer.classList.add('form-group');
-    divLayer.appendChild(label);
-    divLayer.appendChild(select);
-    this._drawMultiple(bFieldMultiple, modelElementName, divLayer);
-    this.container.appendChild(divLayer);
-  }
-
-  _getFieldset(modelElementName) {
-    const fieldsetName =
-      parseInt(modelElementName, 10) !== modelElementName
-        ? modelElementName
-        : `group_${modelElementName}`;
-    const fieldset = document.createElement('fieldset');
-    fieldset.setAttribute('id', fieldsetName);
-    fieldset.setAttribute('name', fieldsetName);
-    // eslint-disable-next-line eqeqeq
-    if (parseInt(modelElementName, 10) != modelElementName) {
-      fieldset.innerHTML = `<legend>${modelElementName}</legend>`;
-    }
-    this.container.appendChild(fieldset);
-    return fieldset;
-  }
-
-  _createAddBtn(modelElementName) {
-    const modelElement = this.model[modelElementName];
-    const addButton = document.createElement('button');
-    addButton.innerHTML = 'Add';
-    addButton.classList.add('btn', 'btn-primary');
-    addButton.addEventListener('click', () => {
-      // model.push({});
-      // console.log(modelElement);
-      this.kk = modelElement;
-    });
-    return addButton;
-  }
-
-  _createModelFields(modelElementName, bFieldMultiple = false) {
-    const model = this.model[modelElementName];
-    const groups = this.groups[modelElementName] || [];
-    if (model.constructor.name === 'Array') {
-      this._createSelectField(model, modelElementName, bFieldMultiple);
-    } else {
-      this.container = this._getFieldset(modelElementName);
-      this._drawFormFieldsModel(model, groups, bFieldMultiple);
-      this.container = this.container.parentNode;
-    }
-  }
-
-  _getSchema() {
-    return new Promise(resolve => {
-      const databaseModel = getDatabase(this.firebaseApp);
-      const databaseRef = ref(databaseModel, `/__schema__`);
-      onValue(databaseRef, snapshot => {
-        const schema = snapshot.val();
-        this.model = schema.__model__;
-        this.groups = schema.__groups__;
-        this.info = schema.__info__;
-        resolve();
-      });
-    });
-  }
-
-  _getData() {
-    return new Promise(resolve => {
-      const databaseModel = getDatabase(this.firebaseApp);
-      const databaseRef = ref(databaseModel, this.path);
-      onValue(databaseRef, snapshot => {
-        resolve(snapshot.val());
-      });
-    });
-  }
-
+  /** DRAW FIELDS FORM */
   _drawMainFieldGroups(group) {
     this.groupKeys = [];
     this.groupsObj = {};
@@ -225,6 +80,17 @@ export class FirebaseAutoform extends LitElement {
   }
 
   _drawFormFieldsModel(model, groups = [], _bFieldMultiple = false) {
+    const getAllGroupValues = (grps) => {
+      let all = [];
+      const arr = Object.values(grps);
+      arr.reduce((acum, el)=>{
+          all = [...all, ...el];
+          return all;
+      }, []);
+      return all;
+    };
+    const allGroupValues = (groups.constructor.name === 'Object') ? getAllGroupValues(groups) : [];
+    const groupKeys = Object.keys(groups);
     Object.keys(model).forEach(modelElementName => {
       const fieldData = model[modelElementName].split('_');
       const fieldType = fieldData[0];
@@ -232,39 +98,400 @@ export class FirebaseAutoform extends LitElement {
         fieldData[1] === 'array' ||
         (fieldData[1] !== undefined && _bFieldMultiple);
       // console.log(modelElementName, fieldType, bFieldMultiple);
-      if (groups.constructor.name === 'Object') {
-        const groupKeys = Object.keys(groups);
+
+      if (!allGroupValues.includes(modelElementName)) {
+        this.fn[fieldType](modelElementName, bFieldMultiple, fieldType);
+      } else if (groupKeys.length > 0) {
         groupKeys.forEach(groupKey => {
+
+          // ¿¿¿ COMO ORDENAR EL MODELO EN FUNCION DEL ORDEN DE LOS GRUPOS ???         
+          // QUIZÁS AL RECUPERAR EL MODELO DE FIREBASE, ORDENARLO POR EL ORDEN DE LOS GRUPOS  ¿.findIndex?
+
           if (groups[groupKey].includes(modelElementName)) {
-            const groupContainer =
-              parseInt(groupKey, 10) !== groupKey
+            const groupContainer = Number.isNaN(groupKey)
                 ? this.container.querySelector(`#${groupKey}`)
                 : this.container.querySelector(`#group_${groupKey}`);
             this.container = groupContainer;
-            this.fn[fieldType](modelElementName, bFieldMultiple);
+            this.fn[fieldType](modelElementName, bFieldMultiple, fieldType);
             this.container = this.container.parentNode;
           }
         });
       } else {
-        this.fn[fieldType](modelElementName, bFieldMultiple);
+        this.fn[fieldType](modelElementName, bFieldMultiple, fieldType);
       }
     });
   }
 
-  _drawForms() {
+  _drawFormScaffolding() {
     this.container.innerHTML = '';
+    this.container.appendChild(this.bocadillo);    
     const path = this.path.split('/')[1];
     const model = this.model[path];
     const groups = this.groups[path];
     this.pathName = path;
     this._drawMainFieldGroups(groups);
     this._drawFormFieldsModel(model, this.groupsObj);
+    this.validateForm = new ValidateForm(this.save,{scope: this.shadowRoot});
+    // this.validateForm.checkFieldsToValidate();
   }
 
+  _drawMultiple(bFieldMultiple, modelElementName, divLayer, type) {
+    const fnTypes = {
+      'input': this._createAddInputBtn.bind(this, modelElementName),
+      'textarea': this._createAddTextareaBtn.bind(this, modelElementName),
+      'select': this._createAddSelectBtn.bind(this, modelElementName),
+    };
+
+    if (bFieldMultiple) {
+      const addButton = fnTypes[type](modelElementName);
+      divLayer.appendChild(addButton);
+    }
+  }
+
+  /** CREATE ELEMENTS */
+
+
+
+  _createRadioButton(modelElementName) {
+    const password = document.createElement('input');
+    password.setAttribute('type', 'radio');
+    password.classList.add('form-control');
+    password.setAttribute('name', modelElementName);
+    password.setAttribute('id', modelElementName);
+    this._addInputEvents(password, modelElementName);
+    return password;
+  }
+
+  _createRadioButtonField(modelElementName) {
+    const label = this._createLabel(modelElementName);
+    const password = this._createRadioButton(modelElementName);
+    const divLayer = document.createElement('div');
+    divLayer.classList.add('form-group');
+    divLayer.appendChild(label);
+    divLayer.appendChild(password);
+    this.container.appendChild(divLayer);
+    this._createInfoIcon(password, modelElementName);
+  }
+
+  _createTextarea(modelElementName) {
+    const textarea = document.createElement('textarea');
+    textarea.classList.add('form-control');
+    textarea.setAttribute('name', modelElementName);
+    textarea.setAttribute('id', modelElementName);
+    textarea.setAttribute('rows', '5');
+    textarea.innerHTML = '';
+    this._addTextareaEvents(textarea, modelElementName);
+    return textarea;
+  }
+
+  _createTextareaField(modelElementName, bFieldMultiple = false) {
+    const label = this._createLabel(modelElementName);
+    const textarea = this._createTextarea(modelElementName);
+    const divLayer = document.createElement('div');
+    divLayer.classList.add('form-group');
+    divLayer.appendChild(label);
+    divLayer.appendChild(textarea);
+    this._drawMultiple(bFieldMultiple, modelElementName, divLayer, 'textarea');
+    this.container.appendChild(divLayer);
+    this._createInfoIcon(textarea, modelElementName);
+  }
+
+  _createLabel(modelElementName) {
+    this.kk = 'kk';
+    const label = document.createElement('label');
+    label.setAttribute('for', modelElementName);
+    label.innerHTML = modelElementName.replace(/_/g, ' ');
+    return label;
+  }
+
+  _createInput(modelElementName, fieldType) {
+    const input = document.createElement('input');
+    input.setAttribute('type', fieldType);
+    input.setAttribute('name', modelElementName);
+    input.setAttribute('id', modelElementName);
+    input.setAttribute('value', '');
+    input.classList.add('form-control');
+    return this._addValidation(input, modelElementName);
+  }
+
+  _createTextField(modelElementName, bFieldMultiple = false, fieldType = 'text') {
+    const label = this._createLabel(modelElementName);
+    const input = this._createInput(modelElementName, fieldType);
+    this._addInputEvents(input, modelElementName);
+    const divLayer = document.createElement('div');
+    divLayer.classList.add('form-group');
+    divLayer.appendChild(label);
+    divLayer.appendChild(input);
+    this._drawMultiple(bFieldMultiple, modelElementName, divLayer, 'input');
+    this.container.appendChild(divLayer);
+    this._createInfoIcon(label, modelElementName);
+  }
+
+  _createOptions(select, model) {
+    this.kk = 'kk';
+    const optionDefault = document.createElement('option');
+    optionDefault.setAttribute('value', '');
+    optionDefault.innerHTML = 'Selecciona una opción';
+    select.appendChild(optionDefault);
+    model.forEach(item => {
+      const option = document.createElement('option');
+      option.setAttribute('value', item);
+      option.innerHTML = item;
+      select.appendChild(option);
+    });
+  }
+
+  _createSelect(modelElementName) {
+    this.kk = 'kk';
+    const select = document.createElement('select');
+    select.setAttribute('name', modelElementName);
+    select.setAttribute('id', modelElementName);
+    select.classList.add('form-control');
+    return select;
+  }
+
+  _createSelectField(model, modelElementName, bFieldMultiple = false) {
+    const label = this._createLabel(modelElementName);
+    const select = this._createSelect(modelElementName);
+    this._addSelectEvents(select, modelElementName);
+    this._createOptions(select, model);
+    const divLayer = document.createElement('div');
+    divLayer.classList.add('form-group');
+    divLayer.appendChild(label);
+    divLayer.appendChild(select);
+    this._drawMultiple(bFieldMultiple, modelElementName, divLayer, 'select');
+    this.container.appendChild(divLayer);
+    this._createInfoIcon(label, modelElementName);
+  }
+
+  _createInfoIcon(element, modelElementName) {
+    const infoIcon = document.createElement('div');
+    infoIcon.classList.add('info-space');
+    element.parentNode.insertBefore(infoIcon, element);
+    if (this.info[this.pathName][modelElementName]) {
+      infoIcon.classList.add('info-icon');
+      infoIcon.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        ev.preventDefault();
+        const targetInfo = ev.target.getClientRects();
+        const bocadillo = this.info[this.pathName][modelElementName];
+        this._showBocadillo(targetInfo, bocadillo);
+      });
+    }
+  };
+
+  _createAddInputBtn(modelElementName) {
+    const modelElement = this.model[modelElementName];
+    const addButton = document.createElement('button');
+    addButton.innerHTML = 'Add';
+    addButton.classList.add('btn', 'btn-primary');
+    addButton.addEventListener('click', this._addNewInput.bind(this, modelElementName, modelElement));
+    return addButton;
+  }
+
+  _createAddSelectBtn(modelElementName) {
+    const modelElement = this.model[modelElementName];
+    const addButton = document.createElement('button');
+    addButton.innerHTML = 'Add';
+    addButton.classList.add('btn', 'btn-primary');
+    addButton.addEventListener('click', this._addNewSelect.bind(this, modelElementName, modelElement));
+    return addButton;
+  }
+
+  _createAddTextareaBtn(modelElementName) {
+    const modelElement = this.model[modelElementName];
+    const addButton = document.createElement('button');
+    addButton.innerHTML = 'Add';
+    addButton.classList.add('btn', 'btn-primary');
+    addButton.addEventListener('click', this._addNewTextarea.bind(this, modelElementName, modelElement));
+    return addButton;
+  }
+
+  _createModelFields(modelElementName, bFieldMultiple = false) {
+    const model = this.model[modelElementName];
+    const groups = this.groups[modelElementName] || [];
+    if (model.constructor.name === 'Array') {
+      this._createSelectField(model, modelElementName, bFieldMultiple);
+    } else {
+      this.container = this._getFieldset(modelElementName);
+      this._drawFormFieldsModel(model, groups, bFieldMultiple);
+      this.container = this.container.parentNode;
+    }
+  }
+
+  _createBocadillo() {
+    this.bocadillo = document.createElement('div');
+    this.bocadillo.setAttribute('id', 'bocadillo');
+    this.bocadillo.setAttribute('style', 'display: none;');
+    this.bocadillo.classList.add('bocadillo-cuadrado');
+  }
+
+  /** BOCADILLO */
+  _showBocadillo(targetInfo, bocadillo) {
+    if (bocadillo) {
+      this.bocadillo.style.display = 'block';
+      const {scrollY} = window;
+      const targetInfoTop = targetInfo[0].top;
+      const targetInfoHeight = targetInfo[0].height;
+      const bocadilloInfoHeight = this.bocadillo.getBoundingClientRect().height;
+      const targetInfoBottom = targetInfoTop - targetInfoHeight - bocadilloInfoHeight + scrollY;
+      this.bocadillo.innerHTML = `<p>${bocadillo}</p>`;
+      this.bocadillo.style.top = `${targetInfoBottom}px`;
+    }
+  }
+  
+  _hideBocadillo(ev) {
+    if (ev.target.id !== 'bocadillo') {
+      this.bocadillo.style.display = 'none';
+    } 
+  }
+
+  /** GETTERS */
+  _getFieldset(modelElementName) {
+    const fieldsetName = Number.isNaN(modelElementName)
+        ? modelElementName
+        : `group_${modelElementName}`;
+    const fieldset = document.createElement('fieldset');
+    fieldset.setAttribute('id', fieldsetName);
+    fieldset.setAttribute('name', fieldsetName);
+    // eslint-disable-next-line eqeqeq
+    if (parseInt(modelElementName, 10) != modelElementName) {
+      fieldset.innerHTML = `<legend>${modelElementName}</legend>`;
+    }
+    this.container.appendChild(fieldset);
+    return fieldset;
+  }
+
+  _getSchema() {
+    return new Promise(resolve => {
+      const databaseModel = getDatabase(this.firebaseApp);
+      const databaseRef = ref(databaseModel, `/__schema__`);
+      onValue(databaseRef, snapshot => {
+        const schema = snapshot.val();
+        this.model = schema.__model__;
+        this.groups = schema.__groups__;
+        this.info = schema.__info__;
+        this.validation = schema.__validation__;
+        resolve();
+      });
+    });
+  }
+
+  _getData() {
+    return new Promise(resolve => {
+      const databaseModel = getDatabase(this.firebaseApp);
+      const databaseRef = ref(databaseModel, this.path);
+      onValue(databaseRef, snapshot => {
+        resolve(snapshot.val());
+      });
+    });
+  }
+
+  /** ADD EVENTS */
+  _addSelectEvents(select, modelElementName) {
+    select.addEventListener('change', e => {
+      this.model[modelElementName] = e.target.value;
+      if (this.autoSave) {
+        this.save();
+      }
+    });
+    select.addEventListener('focus', (ev) => {
+      const targetInfo = ev.target.getClientRects();
+      const bocadillo = this.info[this.pathName][modelElementName];
+      this._showBocadillo(targetInfo, bocadillo);
+    });
+  }
+
+  _addInputEvents(input, modelElementName) {
+    input.addEventListener('blur', e => {
+      this.model[modelElementName] = e.target.value;
+      if (this.autoSave) {
+        this.save();
+      }
+    });
+  }
+
+  _addTextareaEvents(textarea, modelElementName) {
+    textarea.addEventListener('change', e => {
+      this.model[modelElementName] = e.target.value;
+      if (this.autoSave) {
+        this.save();
+      }
+    });
+  }
+
+  /** ADD FORM ELEMENTS */
+  _addNewInput(modelElementName, modelElement, ev) {
+    ev.stopPropagation();
+    ev.preventDefault();
+    const label = document.createElement('label');
+    label.setAttribute('for', modelElementName);
+    const input = this._createInput(modelElementName, modelElement);
+    this._addInputEvents(input, modelElementName);
+    const divLayer = document.createElement('div');
+    divLayer.classList.add('form-group');
+    divLayer.appendChild(label);
+    divLayer.appendChild(input);
+    const brotherLayer = ev.target.parentNode;
+    brotherLayer.parentNode.insertBefore(divLayer, brotherLayer.nextSibling);
+    this._createInfoIcon(label, '');
+  }
+
+  _addNewSelect(modelElementName, modelElement, ev) {
+    ev.stopPropagation();
+    ev.preventDefault();
+    const label = document.createElement('label');
+    label.setAttribute('for', modelElementName);
+    const select = this._createSelect(modelElementName, modelElement);
+    this._createOptions(select, modelElement);
+    this._addSelectEvents(select, modelElementName);
+    const divLayer = document.createElement('div');
+    divLayer.classList.add('form-group');
+    divLayer.appendChild(label);
+    divLayer.appendChild(select);
+    const brotherLayer = ev.target.parentNode;
+    brotherLayer.parentNode.insertBefore(divLayer, brotherLayer.nextSibling);
+    this._createInfoIcon(label, '');
+  }
+
+  _addNewTextarea(modelElementName, modelElement, ev) {
+    ev.stopPropagation();
+    ev.preventDefault();
+    const label = document.createElement('label');
+    label.setAttribute('for', modelElementName);
+    const textarea = this._createTextarea(modelElementName, modelElement);
+    this._addInputEvents(textarea, modelElementName);
+    const divLayer = document.createElement('div');
+    divLayer.classList.add('form-group');
+    divLayer.appendChild(label);
+    divLayer.appendChild(textarea);
+    const brotherLayer = ev.target.parentNode;
+    brotherLayer.parentNode.insertBefore(divLayer, brotherLayer.nextSibling);
+    this._createInfoIcon(label, '');
+  }
+
+  _addValidation(formElement, modelElementName) {
+    const element = formElement;
+    const validation = this.validation[modelElementName];
+    if (validation) {
+      const validationKeys = Object.keys(validation);
+      validationKeys.forEach(validationKey => {
+        const validationValue = validation[validationKey];
+        if (this.htmlInputAttributes.includes(validationKey)) {
+          element.setAttribute(validationKey, validationValue);
+        } else {
+          element.dataset[validationKey] = validationValue;
+        }
+      });
+    }
+    return element;
+  }
+
+  /** MAIN METHODS */
   async _generateForm() {
     await this._getSchema();
     this.data = await this._getData();
-    this._drawForms();
+    this._drawFormScaffolding();
   }
 
   _firebaseSignedin(ev) {
@@ -276,7 +503,7 @@ export class FirebaseAutoform extends LitElement {
 
   save() {
     this.kk = 'kk';
-    // console.log(this.path, this.model);
+    console.log(`save ${this.path}`);
     // const databaseModel = getDatabase(this.firebaseApp);
     // const databaseRef = ref(databaseModel, this.path);
     // databaseRef.set(this.model);
@@ -288,7 +515,7 @@ export class FirebaseAutoform extends LitElement {
         rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
       />
-      <form id="form-${this.id}" class="container 100%"></form>
+      <form id="form-${this.id}" class="container 100%" data-validate="true" data-checkrealtime="true"></form>
     `;
   }
 }

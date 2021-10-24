@@ -17,6 +17,7 @@
     "storybook:build": "npm run analyze --exclude dist && build-storybook"
   },
   "dependencies": {
+    "automatic_form_validation": "^1.4.1",
     "firebase": "^9.1.3",
     "lit": "^2.0.0-rc.3"
   },
