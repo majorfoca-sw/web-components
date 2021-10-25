@@ -63,20 +63,22 @@ export class FirebaseAutoform extends LitElement {
   }
 
   /** DRAW FIELDS FORM */
-  _drawMainFieldGroups(group) {
+  _drawMainFieldGroups(groups) {
     this.groupKeys = [];
     this.groupsObj = {};
-    group.forEach(item => {
-      this.groupKeys.push(Object.keys(item)[0]);
-      // eslint-disable-next-line prefer-destructuring
-      this.groupsObj[Object.keys(item)[0]] = Object.values(item)[0];
-    });
-    this.groupKeys.forEach(groupKey => {
-      // const fieldsetName = this.groupsObj[groupKey];
-      // console.log(groupKey, fieldsetName);
-      const fieldset = this._getFieldset(groupKey);
-      this.container.appendChild(fieldset);
-    });
+    if (groups) {
+      groups.forEach(group => {
+        this.groupKeys.push(Object.keys(group)[0]);
+        // eslint-disable-next-line prefer-destructuring
+        this.groupsObj[Object.keys(group)[0]] = Object.values(group)[0];
+      });
+      this.groupKeys.forEach(groupKey => {
+        // const fieldsetName = this.groupsObj[groupKey];
+        // console.log(groupKey, fieldsetName);
+        const fieldset = this._getFieldset(groupKey);
+        this.container.appendChild(fieldset);
+      });
+    }
   }
 
   _drawFormFieldsModel(model, groups = [], _bFieldMultiple = false) {
@@ -265,18 +267,20 @@ export class FirebaseAutoform extends LitElement {
   }
 
   _createInfoIcon(element, modelElementName) {
-    const infoIcon = document.createElement('div');
-    infoIcon.classList.add('info-space');
-    element.parentNode.insertBefore(infoIcon, element);
-    if (this.info[this.pathName][modelElementName]) {
-      infoIcon.classList.add('info-icon');
-      infoIcon.addEventListener('click', (ev) => {
-        ev.stopPropagation();
-        ev.preventDefault();
-        const targetInfo = ev.target.getClientRects();
-        const bocadillo = this.info[this.pathName][modelElementName];
-        this._showBocadillo(targetInfo, bocadillo);
-      });
+    if (this.info[this.pathName]) {
+      const infoIcon = document.createElement('div');
+      infoIcon.classList.add('info-space');
+      element.parentNode.insertBefore(infoIcon, element);
+      if (this.info[this.pathName][modelElementName]) {
+        infoIcon.classList.add('info-icon');
+        infoIcon.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          ev.preventDefault();
+          const targetInfo = ev.target.getClientRects();
+          const bocadillo = this.info[this.pathName][modelElementName];
+          this._showBocadillo(targetInfo, bocadillo);
+        });
+      }
     }
   };
 
