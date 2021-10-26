@@ -56,6 +56,7 @@ export class FirebaseAutoform extends LitElement {
     if (super.firstUpdated) {
       super.firstUpdated();
     }
+    this.pathName = this.path.substring(1);
     this.id = this.id || `firebase-autoform-${new Date().getTime()}`;
     document.addEventListener('click', this._hideBocadillo.bind(this));
     this.container = this.shadowRoot.querySelector('.container');
@@ -127,10 +128,8 @@ export class FirebaseAutoform extends LitElement {
   _drawFormScaffolding() {
     this.container.innerHTML = '';
     this.container.appendChild(this.bocadillo);    
-    const path = this.path.split('/')[1];
-    const model = this.model[path];
-    const groups = this.groups[path];
-    this.pathName = path;
+    const model = this.model[this.pathName];
+    const {groups} = this;
     this._drawMainFieldGroups(groups);
     this._drawFormFieldsModel(model, this.groupsObj);
     this.validateForm = new ValidateForm(this.save,{scope: this.shadowRoot});
@@ -267,17 +266,17 @@ export class FirebaseAutoform extends LitElement {
   }
 
   _createInfoIcon(element, modelElementName) {
-    if (this.info[this.pathName]) {
+    if (this.info) {
       const infoIcon = document.createElement('div');
       infoIcon.classList.add('info-space');
       element.parentNode.insertBefore(infoIcon, element);
-      if (this.info[this.pathName][modelElementName]) {
+      if (this.info[modelElementName]) {
         infoIcon.classList.add('info-icon');
         infoIcon.addEventListener('click', (ev) => {
           ev.stopPropagation();
           ev.preventDefault();
           const targetInfo = ev.target.getClientRects();
-          const bocadillo = this.info[this.pathName][modelElementName];
+          const bocadillo = this.info[modelElementName];
           this._showBocadillo(targetInfo, bocadillo);
         });
       }
@@ -369,7 +368,7 @@ export class FirebaseAutoform extends LitElement {
   _getSchema() {
     return new Promise(resolve => {
       const databaseModel = getDatabase(this.firebaseApp);
-      const databaseRef = ref(databaseModel, `/__schema__`);
+      const databaseRef = ref(databaseModel, `/__schema__/${this.pathName}`);
       onValue(databaseRef, snapshot => {
         const schema = snapshot.val();
         this.model = schema.__model__;
@@ -401,7 +400,7 @@ export class FirebaseAutoform extends LitElement {
     });
     select.addEventListener('focus', (ev) => {
       const targetInfo = ev.target.getClientRects();
-      const bocadillo = this.info[this.pathName][modelElementName];
+      const bocadillo = this.info[modelElementName];
       this._showBocadillo(targetInfo, bocadillo);
     });
   }
