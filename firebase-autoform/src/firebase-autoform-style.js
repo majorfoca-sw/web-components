@@ -6,10 +6,14 @@ export const firebaseAutoformStyles = css`
     display: block;
   }
 
+  form {
+    margin:0;
+  }
+
   fieldset {
     border: 1px solid #ddd !important;
     border-radius: 1rem;
-    margin: 2rem;
+    margin: 2rem 0;
     padding: 1rem;
     display: inline-flex;
     flex-wrap: wrap;
@@ -21,7 +25,6 @@ export const firebaseAutoformStyles = css`
     padding: 0;
     margin-top: 0.5rem;
     font-size: 1.2rem;
-    width: 12%;
   }
 
   button {
@@ -29,16 +32,21 @@ export const firebaseAutoformStyles = css`
   }
 
   .form-group {
-    display: inline-flex;
+    /*display: inline-flex;
     flex-wrap: wrap;
-    justify-content: flex-start;
-    width: 70vw;
+    justify-content: flex-start;*/
+    display: grid;
+    grid-row: 1;
+    grid-template-columns: 3% 12% 70% auto;
+    grid-gap: 1rem;
+    width: 100vw;
     margin: 1rem 0;
   }
 
-  .form-control {
-    max-width: 74%;
+  .grid-field {
     margin: 0 1rem;
+    z-index: 10;
+    background: transparent
   }
 
   .bocadillo-cuadrado {
@@ -68,8 +76,46 @@ export const firebaseAutoformStyles = css`
     cursor: help;
   }
   .info-space {
+    grid-column: 1 / 1;
+    grid-row: 1;
     width: 24px;
     height: 24px;
     margin: 7px 5px 7px 0;
+  }
+  .badgesLayer {
+    grid-column: 3 / 3;
+    grid-row: 1;
+    height: 1.5rem;
+    text-align: right;
+  }
+  .badgesLayer .badge-primary {
+    color: #000;
+    border-radius: 0.25rem;
+    margin: 0.5rem 0;
+  }
+  label {
+    grid-column: 2 / 2;
+    grid-row: 1;
+  }
+  .field-control {
+    grid-column: 3 / 3;
+    grid-row: 1;
+    display: block;
+    width: 100%;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #212529;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border-radius: 0.25rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    margin: 0 1rem;
+    z-index: 10;
+    background: transparent
   }
 `;

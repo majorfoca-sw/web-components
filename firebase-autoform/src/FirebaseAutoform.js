@@ -39,6 +39,7 @@ export class FirebaseAutoform extends LitElement {
       date: this._createTextField.bind(this),
       boolean: this._createRadioButtonField.bind(this),
       model: this._createModelFields.bind(this),
+      category: this._createCategoryFields.bind(this),
     };
 
     this.htmlInputAttributes = ['maxlength', 'minlength', 'size', 'max', 'min', 'step', 'pattern', 'placeholder'];
@@ -127,11 +128,8 @@ export class FirebaseAutoform extends LitElement {
   _drawFormScaffolding() {
     this.container.innerHTML = '';
     this.container.appendChild(this.bocadillo);    
-    const path = this.path.split('/')[1];
-    const model = this.model[path];
-    const groups = this.groups[path];
-    this.pathName = path;
-    this._drawMainFieldGroups(groups);
+    const model = this.model[this.pathName];
+    this._drawMainFieldGroups(this.groups);
     this._drawFormFieldsModel(model, this.groupsObj);
     this.validateForm = new ValidateForm(this.save,{scope: this.shadowRoot});
     // this.validateForm.checkFieldsToValidate();
@@ -151,13 +149,10 @@ export class FirebaseAutoform extends LitElement {
   }
 
   /** CREATE ELEMENTS */
-
-
-
   _createRadioButton(modelElementName) {
     const password = document.createElement('input');
     password.setAttribute('type', 'radio');
-    password.classList.add('form-control');
+    password.classList.add('field-control');
     password.setAttribute('name', modelElementName);
     password.setAttribute('id', modelElementName);
     this._addInputEvents(password, modelElementName);
@@ -177,7 +172,7 @@ export class FirebaseAutoform extends LitElement {
 
   _createTextarea(modelElementName) {
     const textarea = document.createElement('textarea');
-    textarea.classList.add('form-control');
+    textarea.classList.add('field-control');
     textarea.setAttribute('name', modelElementName);
     textarea.setAttribute('id', modelElementName);
     textarea.setAttribute('rows', '5');
@@ -212,7 +207,8 @@ export class FirebaseAutoform extends LitElement {
     input.setAttribute('name', modelElementName);
     input.setAttribute('id', modelElementName);
     input.setAttribute('value', '');
-    input.classList.add('form-control');
+    input.classList.add('field-control');
+    input.classList.add('grid-field');
     return this._addValidation(input, modelElementName);
   }
 
@@ -229,11 +225,11 @@ export class FirebaseAutoform extends LitElement {
     this._createInfoIcon(label, modelElementName);
   }
 
-  _createOptions(select, model) {
+  _createOptions(select, model, bFieldMultiple) {
     this.kk = 'kk';
     const optionDefault = document.createElement('option');
     optionDefault.setAttribute('value', '');
-    optionDefault.innerHTML = 'Selecciona una opción';
+    optionDefault.innerHTML = (bFieldMultiple) ? 'Selecciona una o varias opciones' : 'Selecciona una opción';
     select.appendChild(optionDefault);
     model.forEach(item => {
       const option = document.createElement('option');
@@ -248,7 +244,7 @@ export class FirebaseAutoform extends LitElement {
     const select = document.createElement('select');
     select.setAttribute('name', modelElementName);
     select.setAttribute('id', modelElementName);
-    select.classList.add('form-control');
+    select.classList.add('field-control');
     return select;
   }
 
@@ -256,28 +252,33 @@ export class FirebaseAutoform extends LitElement {
     const label = this._createLabel(modelElementName);
     const select = this._createSelect(modelElementName);
     this._addSelectEvents(select, modelElementName);
-    this._createOptions(select, model);
+    this._createOptions(select, model, bFieldMultiple);
     const divLayer = document.createElement('div');
     divLayer.classList.add('form-group');
     divLayer.appendChild(label);
     divLayer.appendChild(select);
-    this._drawMultiple(bFieldMultiple, modelElementName, divLayer, 'select');
+    if (bFieldMultiple) {
+      select.setAttribute('multiple', 'multiple');
+      select.setAttribute('searchable', 'Search here..');
+      select.classList.add("mdb-select", "colorful-select", "dropdown-primary", "md-form");
+    }
+    // this._drawMultiple(bFieldMultiple, modelElementName, divLayer, 'select');
     this.container.appendChild(divLayer);
     this._createInfoIcon(label, modelElementName);
   }
 
   _createInfoIcon(element, modelElementName) {
-    if (this.info[this.pathName]) {
+    if (this.info) {
       const infoIcon = document.createElement('div');
       infoIcon.classList.add('info-space');
       element.parentNode.insertBefore(infoIcon, element);
-      if (this.info[this.pathName][modelElementName]) {
+      if (this.info[modelElementName]) {
         infoIcon.classList.add('info-icon');
         infoIcon.addEventListener('click', (ev) => {
           ev.stopPropagation();
           ev.preventDefault();
           const targetInfo = ev.target.getClientRects();
-          const bocadillo = this.info[this.pathName][modelElementName];
+          const bocadillo = this.info[modelElementName];
           this._showBocadillo(targetInfo, bocadillo);
         });
       }
@@ -323,6 +324,33 @@ export class FirebaseAutoform extends LitElement {
     }
   }
 
+  _createCategoryFields(modelElementName) {
+    const label = this._createLabel(modelElementName);
+    const input = this._createInput(modelElementName, 'text');
+    this._addCategoryEvents(input, modelElementName);
+    const divBadges = document.createElement('div');
+    divBadges.classList.add('badgesLayer');
+    divBadges.innerHTML = '';
+    const divLayer = document.createElement('div');
+    divLayer.classList.add('form-group');
+    divLayer.appendChild(label);
+    divLayer.appendChild(input);
+    divLayer.appendChild(divBadges);
+    this.container.appendChild(divLayer);
+    this._createInfoIcon(label, modelElementName);
+  }
+
+  _createSpanBadge(modelElementName, layer) {
+    this.kk = 'kk';
+    const span = document.createElement('span');
+    span.classList.add('badge', 'badge-primary');
+    const color = `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.5)`
+    span.style.backgroundColor = color;
+    span.innerHTML = modelElementName;
+    layer.appendChild(span);
+  }
+
+  /** BOCADILLO */
   _createBocadillo() {
     this.bocadillo = document.createElement('div');
     this.bocadillo.setAttribute('id', 'bocadillo');
@@ -330,7 +358,6 @@ export class FirebaseAutoform extends LitElement {
     this.bocadillo.classList.add('bocadillo-cuadrado');
   }
 
-  /** BOCADILLO */
   _showBocadillo(targetInfo, bocadillo) {
     if (bocadillo) {
       this.bocadillo.style.display = 'block';
@@ -369,14 +396,18 @@ export class FirebaseAutoform extends LitElement {
   _getSchema() {
     return new Promise(resolve => {
       const databaseModel = getDatabase(this.firebaseApp);
-      const databaseRef = ref(databaseModel, `/__schema__`);
+      const databaseRef = ref(databaseModel, `/__schema__/${this.pathName}`);
       onValue(databaseRef, snapshot => {
         const schema = snapshot.val();
-        this.model = schema.__model__;
-        this.groups = schema.__groups__;
-        this.info = schema.__info__;
-        this.validation = schema.__validation__;
-        resolve();
+        if (schema) {
+          this.model = schema.__model__;
+          this.groups = schema.__groups__;
+          this.info = schema.__info__;
+          this.validation = schema.__validation__;
+          resolve();
+        } else {
+          throw new Error('No se encontró el schema');
+        }
       });
     });
   }
@@ -401,7 +432,7 @@ export class FirebaseAutoform extends LitElement {
     });
     select.addEventListener('focus', (ev) => {
       const targetInfo = ev.target.getClientRects();
-      const bocadillo = this.info[this.pathName][modelElementName];
+      const bocadillo = this.info[modelElementName];
       this._showBocadillo(targetInfo, bocadillo);
     });
   }
@@ -411,6 +442,26 @@ export class FirebaseAutoform extends LitElement {
       this.model[modelElementName] = e.target.value;
       if (this.autoSave) {
         this.save();
+      }
+    });
+  }
+
+  _addCategoryEvents(input, modelElementName) {
+    input.addEventListener('blur', e => {
+      // this.model[modelElementName] = e.target.value;
+      const element = e.target;
+      if (element.value !== '') {
+        this._addBadgeToInput(element, modelElementName);
+      }
+      if (this.autoSave) {
+        this.save();
+      }
+    });
+    input.addEventListener('keypress', e => {
+      if (e.keyCode === 13) {
+        e.preventDefault();
+        const element = e.target;
+        this._addBadgeToInput(element, modelElementName);
       }
     });
   }
@@ -476,23 +527,37 @@ export class FirebaseAutoform extends LitElement {
 
   _addValidation(formElement, modelElementName) {
     const element = formElement;
-    const validation = this.validation[modelElementName];
-    if (validation) {
-      const validationKeys = Object.keys(validation);
-      validationKeys.forEach(validationKey => {
-        const validationValue = validation[validationKey];
-        if (this.htmlInputAttributes.includes(validationKey)) {
-          element.setAttribute(validationKey, validationValue);
-        } else {
-          element.dataset[validationKey] = validationValue;
-        }
-      });
+    if (this.validation) {
+      const validation = this.validation[modelElementName];
+      if (validation) {
+        const validationKeys = Object.keys(validation);
+        validationKeys.forEach(validationKey => {
+          const validationValue = validation[validationKey];
+          if (this.htmlInputAttributes.includes(validationKey)) {
+            element.setAttribute(validationKey, validationValue);
+          } else {
+            element.dataset[validationKey] = validationValue;
+          }
+        });
+      }
     }
     return element;
   }
 
+  _addBadgeToInput(element) {
+    const input = element;
+    const layer = input.parentNode.querySelector('.badgesLayer');
+    this._createSpanBadge(input.value, layer);
+    const dataValue = input.dataset.value || '';
+    const dataValueArray = dataValue.split(',');
+    dataValueArray.push(input.value);
+    input.dataset.value = dataValueArray.join(',');
+    input.value = '';
+  }
+
   /** MAIN METHODS */
   async _generateForm() {
+    this.pathName = this.path.substring(1);
     await this._getSchema();
     this.data = await this._getData();
     this._drawFormScaffolding();
