@@ -25,6 +25,7 @@ export class FirebaseAutoform extends LitElement {
     this.model = {};
     this.groups = {};
     this.info = {};
+    this.types = {};
     this.data = {};
     this.user = null;
     this.firebaseApp = null;
@@ -133,7 +134,6 @@ export class FirebaseAutoform extends LitElement {
     this._drawMainFieldGroups(groups);
     this._drawFormFieldsModel(model, this.groupsObj);
     this.validateForm = new ValidateForm(this.save,{scope: this.shadowRoot});
-    // this.validateForm.checkFieldsToValidate();
   }
 
   _drawMultiple(bFieldMultiple, modelElementName, divLayer, type) {
@@ -141,6 +141,7 @@ export class FirebaseAutoform extends LitElement {
       'input': this._createAddInputBtn.bind(this, modelElementName),
       'textarea': this._createAddTextareaBtn.bind(this, modelElementName),
       'select': this._createAddSelectBtn.bind(this, modelElementName),
+      'model': this._createAddModelBtn.bind(this, modelElementName),
     };
 
     if (bFieldMultiple) {
@@ -150,15 +151,12 @@ export class FirebaseAutoform extends LitElement {
   }
 
   /** CREATE ELEMENTS */
-
-
-
   _createRadioButton(modelElementName) {
     const password = document.createElement('input');
     password.setAttribute('type', 'radio');
     password.classList.add('form-control');
     password.setAttribute('name', modelElementName);
-    password.setAttribute('id', modelElementName);
+    password.setAttribute('id', this._getNewId(modelElementName));
     this._addInputEvents(password, modelElementName);
     return password;
   }
@@ -178,7 +176,7 @@ export class FirebaseAutoform extends LitElement {
     const textarea = document.createElement('textarea');
     textarea.classList.add('form-control');
     textarea.setAttribute('name', modelElementName);
-    textarea.setAttribute('id', modelElementName);
+    textarea.setAttribute('id', this._getNewId(modelElementName));
     textarea.setAttribute('rows', '5');
     textarea.innerHTML = '';
     this._addTextareaEvents(textarea, modelElementName);
@@ -209,7 +207,7 @@ export class FirebaseAutoform extends LitElement {
     const input = document.createElement('input');
     input.setAttribute('type', fieldType);
     input.setAttribute('name', modelElementName);
-    input.setAttribute('id', modelElementName);
+    input.setAttribute('id', this._getNewId(modelElementName));
     input.setAttribute('value', '');
     input.classList.add('form-control');
     return this._addValidation(input, modelElementName);
@@ -246,7 +244,7 @@ export class FirebaseAutoform extends LitElement {
     this.kk = 'kk';
     const select = document.createElement('select');
     select.setAttribute('name', modelElementName);
-    select.setAttribute('id', modelElementName);
+    select.setAttribute('id', this._getNewId(modelElementName));
     select.classList.add('form-control');
     return select;
   }
@@ -283,11 +281,18 @@ export class FirebaseAutoform extends LitElement {
     }
   };
 
+  _addBtnProperties(btn, modelElementName) {
+    const addButton = btn;
+    this.kk = 'kk';
+    addButton.title = `Add new ${modelElementName}`;
+    addButton.innerHTML = 'Add';
+    addButton.classList.add('btn', 'btn-primary');
+  }
+
   _createAddInputBtn(modelElementName) {
     const modelElement = this.model[modelElementName];
     const addButton = document.createElement('button');
-    addButton.innerHTML = 'Add';
-    addButton.classList.add('btn', 'btn-primary');
+    this._addBtnProperties(addButton, modelElementName);
     addButton.addEventListener('click', this._addNewInput.bind(this, modelElementName, modelElement));
     return addButton;
   }
@@ -295,8 +300,7 @@ export class FirebaseAutoform extends LitElement {
   _createAddSelectBtn(modelElementName) {
     const modelElement = this.model[modelElementName];
     const addButton = document.createElement('button');
-    addButton.innerHTML = 'Add';
-    addButton.classList.add('btn', 'btn-primary');
+    this._addBtnProperties(addButton, modelElementName);
     addButton.addEventListener('click', this._addNewSelect.bind(this, modelElementName, modelElement));
     return addButton;
   }
@@ -304,9 +308,16 @@ export class FirebaseAutoform extends LitElement {
   _createAddTextareaBtn(modelElementName) {
     const modelElement = this.model[modelElementName];
     const addButton = document.createElement('button');
-    addButton.innerHTML = 'Add';
-    addButton.classList.add('btn', 'btn-primary');
+    this._addBtnProperties(addButton, modelElementName);
     addButton.addEventListener('click', this._addNewTextarea.bind(this, modelElementName, modelElement));
+    return addButton;
+  }
+
+  _createAddModelBtn(modelElementName) {
+    const modelElement = this.model[modelElementName];
+    const addButton = document.createElement('button');
+    this._addBtnProperties(addButton, modelElementName);
+    addButton.addEventListener('click', this._addNewModel.bind(this, modelElementName, modelElement, 'model'));
     return addButton;
   }
 
@@ -318,10 +329,12 @@ export class FirebaseAutoform extends LitElement {
     } else {
       this.container = this._getFieldset(modelElementName);
       this._drawFormFieldsModel(model, groups, bFieldMultiple);
+      this._drawMultiple(bFieldMultiple, modelElementName, this.container.parentNode, 'model');
       this.container = this.container.parentNode;
     }
   }
 
+  /** BOCADILLO */
   _createBocadillo() {
     this.bocadillo = document.createElement('div');
     this.bocadillo.setAttribute('id', 'bocadillo');
@@ -329,7 +342,6 @@ export class FirebaseAutoform extends LitElement {
     this.bocadillo.classList.add('bocadillo-cuadrado');
   }
 
-  /** BOCADILLO */
   _showBocadillo(targetInfo, bocadillo) {
     if (bocadillo) {
       this.bocadillo.style.display = 'block';
@@ -390,6 +402,12 @@ export class FirebaseAutoform extends LitElement {
     });
   }
 
+  _getNewId(modelElementName) {
+    const fieldsWithSameName = this.shadowRoot.querySelectorAll(`[name="${modelElementName}"]`);
+    const N = fieldsWithSameName.length;
+    return `${modelElementName}-${N}`;
+  }
+
   /** ADD EVENTS */
   _addSelectEvents(select, modelElementName) {
     select.addEventListener('change', e => {
@@ -424,6 +442,14 @@ export class FirebaseAutoform extends LitElement {
   }
 
   /** ADD FORM ELEMENTS */
+  _addNewModel(modelElementName, bFieldMultiple, fieldType, ev) {
+    ev.stopPropagation();
+    ev.preventDefault();
+    const fieldset = this._getFieldset(modelElementName);
+    this.container.appendChild(fieldset);
+    this.fn[fieldType](modelElementName, bFieldMultiple, fieldType);
+  }
+
   _addNewInput(modelElementName, modelElement, ev) {
     ev.stopPropagation();
     ev.preventDefault();
@@ -504,9 +530,25 @@ export class FirebaseAutoform extends LitElement {
     this._generateForm();
   }
 
+  getFormValues() {
+    // for each form field get the value and save it in the model
+    const formElements = this.container.querySelectorAll('input, select, textarea');
+    formElements.forEach(formElement => {
+      const modelElementName = formElement.getAttribute('name');
+      if (formElement.tagName === 'SELECT') {
+        this.model[modelElementName] = formElement.value;
+      } else if (formElement.tagName === 'INPUT') {
+        this.model[modelElementName] = formElement.value;
+      } else if (formElement.tagName === 'TEXTAREA') {
+        this.model[modelElementName] = formElement.value;
+      }
+    });
+  }
+
   save() {
-    this.kk = 'kk';
     console.log(`save ${this.path}`);
+    this.getFormValues();
+    console.log(this.model);
     // const databaseModel = getDatabase(this.firebaseApp);
     // const databaseRef = ref(databaseModel, this.path);
     // databaseRef.set(this.model);
