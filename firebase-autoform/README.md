@@ -6,6 +6,7 @@ Webcomponent to create a form based in a model schema stored in firebase.
 Create dinamicaly the form and insert or update the fields based in the model schema.
 
 Firebase realtime database has this keys:
+
 - Model -> with the model schema
 - BDD_NAME -> refered in model schema. Is an Array with jsons
 
@@ -70,7 +71,6 @@ To build a production version of Storybook, run
 npm run storybook:build
 ```
 
-
 ## Tooling configs
 
 For most of the tools, the configuration is in the `package.json` to minimize the amount of files in your project.
@@ -84,3 +84,35 @@ npm start
 ```
 
 To run a local development server that serves the basic demo located in `demo/index.html`
+
+# Firebase rules
+
+## By user authenticated contains a word
+
+```json
+{
+  "rules": {
+    ".read": "auth.provider === 'google' && auth.token.email.matches(/fosela/)",
+    ".write": "auth.provider === 'google' && auth.token.email.matches(/fosela/)"
+  }
+}
+```
+
+## By user authenticated can access to its own data
+
+```json
+{
+  "rules": {
+    "__schema__": {
+      ".read": "auth.provider === 'google' && auth.token.email === auth.uid",
+      ".write": "false"
+    },
+    "peliculas": {
+      "$ uid": {
+        ".read": "$uid === auth.uid",
+        ".write ": "$uid === auth.uid"
+      }
+    }
+  }
+}
+```
