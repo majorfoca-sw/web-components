@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es-ES">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        background: #fafafa;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="demo"></div>
+
+    <script type="module">
+      import { html, render } from 'lit';
+      import '../json-autoform.js';
+      import schema from './__schema__.json.js';
+
+      render(
+        html`
+          <json-autoform name="my demo" model-name="demo"></json-autoform>
+        `,
+        document.querySelector('#demo')
+      );
+
+      document.addEventListener('component-created', e => {
+        console.log('component-created', e.detail);
+        if (e.detail.componentName.toLowerCase() === 'json-autoform') {
+          e.detail.component.setSchema(schema);
+        }
+      });
+
+      //
+    </script>
+  </body>
+</html>
