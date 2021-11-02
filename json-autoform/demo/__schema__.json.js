@@ -61,44 +61,44 @@ export default {
       multiple_model_field_thirteen: 'multiple_model',
     },
     __validation__: {
-      single_number_field: {
+      single_number_field_one: {
         maxlength: 2,
         required: true,
         tovalidate: 'number',
       },
-      single_string_field: {
+      single_string_field_two: {
         required: true,
         tovalidate: 'alpha',
       },
-      single_radio_field: {
+      single_radio_field_three_withoutgroup: {
         required: true,
       },
-      single_textarea_field: {
+      single_textarea_field_four: {
         required: true,
         tovalidate: 'alpha',
       },
-      newbbdd_number_field: {
+      newbbdd_number_field_seven: {
         maxlength: 5,
         required: true,
         tovalidate: 'number',
       },
-      newbbdd_string_field: {
+      newbbdd_string_field_eight: {
         required: true,
         tovalidate: 'alpha',
       },
-      multiple_number_field: {
+      multiple_number_field_nine: {
         maxlength: 2,
         required: true,
         tovalidate: 'number',
       },
-      multiple_string_field: {
+      multiple_string_field_ten: {
         required: true,
         tovalidate: 'alpha',
       },
-      multiple_radio_field: {
+      multiple_radio_field_eleven: {
         required: true,
       },
-      multiple_textarea_field: {
+      multiple_textarea_field_twelwe: {
         required: true,
         tovalidate: 'alpha',
       },

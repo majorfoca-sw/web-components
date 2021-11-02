@@ -1,6 +1,6 @@
 import { html, LitElement } from 'lit';
+import { ValidateForm } from 'automatic_form_validation';
 import { jsonAutoformStyles } from './json-autoform-style.js';
-// import { ValidateForm } from 'automatic_form_validation';
 
 export class JsonAutoform extends LitElement {
   static get styles() {
@@ -171,7 +171,9 @@ export class JsonAutoform extends LitElement {
     this.container.appendChild(this.bocadillo);
     this._drawFormMainFieldGroups();
     this._drawFormFieldsModel();
-    // this.validateForm = new ValidateForm(this.isFormUpdated,{scope: this.shadowRoot});
+    this.validateForm = new ValidateForm(this.isFormUpdated, {
+      scope: this.shadowRoot,
+    });
   }
 
   _drawMultiple(bFieldMultiple, modelElementName, divLayer, type) {
@@ -223,7 +225,7 @@ export class JsonAutoform extends LitElement {
     radio.setAttribute('type', 'radio');
     radio.classList.add('form-check-input');
     radio.setAttribute('name', radioName);
-    radio.setAttribute('id', this._getNewId(modelElementName));
+    radio.setAttribute('id', this._getNewId(radioName));
     this._addInputEvents(radio, modelElementName);
     return this._addValidation(radio, modelElementName);
   }
