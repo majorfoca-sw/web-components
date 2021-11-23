@@ -12,6 +12,7 @@ export class JsonAutoform extends LitElement {
       modelName: { type: String, attribute: 'model-name' },
       name: { type: String },
       showName: { type: Boolean, attribute: 'show-name' },
+      level: { type: Number, reflect: true },
     };
   }
 
@@ -20,6 +21,7 @@ export class JsonAutoform extends LitElement {
     this.modelName = modelName;
     this.name = name;
     this.showName = showName;
+    this.level = 0;
 
     this.model = {};
     this.groups = {};
@@ -41,6 +43,7 @@ export class JsonAutoform extends LitElement {
       string: this._createInputField.bind(this),
       password: this._createInputField.bind(this),
       textarea: this._createTextareaField.bind(this),
+      file: this._createFileField.bind(this),
       number: this._createInputField.bind(this),
       date: this._createInputField.bind(this),
       radio: this._createRadioButtonField.bind(this),
@@ -84,7 +87,7 @@ export class JsonAutoform extends LitElement {
     document.addEventListener('click', this._hideBocadillo.bind(this));
     this.container = this.shadowRoot.querySelector('.container');
     this._createBocadillo();
-    const componentCreatedEvent = new CustomEvent('component-created', {
+    const componentCreatedEvent = new CustomEvent('wc-ready', {
       detail: {
         id: this.id,
         componentName: this.tagName,
@@ -132,7 +135,7 @@ export class JsonAutoform extends LitElement {
     const addButton = this._createAddButton(modelElementName);
     container.appendChild(field);
     this._createInfoIcon(field, modelElementName);
-    container.appendChild(addButton);
+    field.appendChild(addButton);
   }
 
   /** DRAW FIELDS FORM */
@@ -195,6 +198,7 @@ export class JsonAutoform extends LitElement {
     this.kk = 'kk';
     const label = document.createElement('label');
     label.setAttribute('for', modelElementName);
+    label.classList.add('main-form-label');
     label.innerHTML = modelElementName.replace(/_/g, ' ');
     return label;
   }
@@ -220,10 +224,11 @@ export class JsonAutoform extends LitElement {
     return this._addValidation(textarea, modelElementName);
   }
 
-  _createRadioButton(modelElementName, radioName = modelElementName) {
+  _createRadioButton(modelElementName, radioName = modelElementName, row) {
     const radio = document.createElement('input');
     radio.setAttribute('type', 'radio');
     radio.classList.add('form-check-input');
+    radio.style.gridRow = `${row} / ${row}`;
     radio.setAttribute('name', radioName);
     radio.setAttribute('id', this._getNewId(radioName));
     this._addInputEvents(radio, modelElementName);
@@ -320,6 +325,16 @@ export class JsonAutoform extends LitElement {
     return divLayer;
   }
 
+  _createFileField(modelElementName) {
+    const label = this._createLabel(modelElementName);
+    const input = this._createInput(modelElementName, 'file');
+    const divLayer = document.createElement('div');
+    divLayer.classList.add('form-group');
+    divLayer.appendChild(label);
+    divLayer.appendChild(input);
+    return divLayer;
+  }
+
   _createRadioButtonField(modelElementName) {
     const label = this._createLabel(modelElementName);
     const radiobuttons = this.schema[modelElementName];
@@ -327,15 +342,23 @@ export class JsonAutoform extends LitElement {
     divLayer.classList.add('form-group');
     divLayer.appendChild(label);
     if (radiobuttons) {
-      radiobuttons.forEach(item => {
-        const radio = this._createRadioButton(item, modelElementName);
+      radiobuttons.forEach((item, index) => {
+        const radio = this._createRadioButton(
+          item,
+          modelElementName,
+          index + 2
+        );
         const subLabel = this._createLabel(item);
         subLabel.classList.add('form-check-label');
         divLayer.appendChild(radio);
         divLayer.appendChild(subLabel);
       });
     } else {
-      const radio = this._createRadioButton(modelElementName);
+      const radio = this._createRadioButton(
+        modelElementName,
+        modelElementName,
+        2
+      );
       divLayer.appendChild(radio);
     }
     return divLayer;
@@ -390,6 +413,7 @@ export class JsonAutoform extends LitElement {
       jsonAutoform.setAttribute('name', modelElementName);
       jsonAutoform.setAttribute('model-name', modelElementName);
       jsonAutoform.setAttribute('id', this._getNewId(modelElementName));
+      jsonAutoform.setAttribute('level', this.level + 1);
       this.addEventListener('component-created', e => {
         // console.log('component-created', e.detail);
         if (e.detail.componentName.toLowerCase() === 'json-autoform') {

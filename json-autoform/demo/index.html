@@ -23,8 +23,8 @@
         document.querySelector('#demo')
       );
 
-      document.addEventListener('component-created', e => {
-        console.log('component-created', e.detail);
+      document.addEventListener('wc-ready', e => {
+        console.log('wc-ready', e.detail);
         if (e.detail.componentName.toLowerCase() === 'json-autoform') {
           e.detail.component.setSchema(schema);
         }

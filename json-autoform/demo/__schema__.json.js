@@ -12,6 +12,7 @@ export default {
         'single_number_field_one',
         'single_string_field_two',
         'single_model_field_six',
+        'single_file_field_six',
       ],
       newbbdd_group: [
         'newbbdd_number_field_seven',
@@ -34,6 +35,7 @@ export default {
         'info about single_radio field three',
       single_textarea_field_four: 'info about single_textarea field four',
       single_model_field_six: 'info about single_model field six',
+      single_file_field_six: 'extension allowed: pdf,zip,jpg,png',
       newbbdd_number_field_seven: 'info about newbbdd_number field seven',
       newbbdd_string_field_eight: 'info about newbbdd_string field eight',
       multiple_number_field_nine: 'info about multiple_number field nine',
@@ -49,6 +51,7 @@ export default {
       single_string_field_twoandhalf: 'single_string',
       single_radio_field_three_withoutgroup: 'single_radio',
       single_textarea_field_four: 'single_textarea',
+      single_file_field_six: 'single_file',
       single_checkbox_field_five_withoutgroup_neitherinfo: 'single_checkbox',
       single_model_field_six: 'single_model',
       newbbdd_number_field_seven: 'newbbdd_number',
@@ -76,6 +79,10 @@ export default {
       single_textarea_field_four: {
         required: true,
         tovalidate: 'alpha',
+      },
+      single_file_field_six: {
+        required: true,
+        tovalidate: 'file:pdf,zip,jpg,png',
       },
       newbbdd_number_field_seven: {
         maxlength: 5,

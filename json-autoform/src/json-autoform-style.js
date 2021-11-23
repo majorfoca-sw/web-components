@@ -9,19 +9,28 @@ export const jsonAutoformStyles = css`
   fieldset {
     border: 1px solid #ddd !important;
     border-radius: 1rem;
-    margin: 2rem;
+    margin: 1rem;
     padding: 1rem;
-    display: inline-flex;
+    display: flex;
+    flex-direction: column;
     flex-wrap: wrap;
     justify-content: flex-start;
-    width: 85vw;
   }
 
   label {
     padding: 0;
     margin-top: 0.5rem;
     font-size: 1.2rem;
-    width: 12%;
+    font-weight: bold;
+  }
+  .form-main-label {
+    grid-area: 1 / 2 / 1 / 3;
+  }
+
+  input,
+  textarea,
+  select {
+    grid-area: 2 / 2 / 2 / 3;
   }
 
   button {
@@ -29,18 +38,14 @@ export const jsonAutoformStyles = css`
   }
 
   .form-group {
-    display: inline-flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    width: 70vw;
-    margin: 1rem 0;
-    align-items: center;
+    display: grid;
+    margin: 1rem;
+    grid-template-columns: min-content 7fr 2fr;
+    grid-template-rows: max-content;
   }
 
   .form-control {
     max-height: 2rem;
-    max-width: 74%;
-    margin: 0 1rem;
   }
 
   .bocadillo-cuadrado {
@@ -74,5 +79,62 @@ export const jsonAutoformStyles = css`
     width: 24px;
     height: 24px;
     margin: 7px 5px 7px 0;
+    grid-area: 1 / 1 / 1 / 1;
+  }
+
+  .form-check-input {
+    width: 1rem;
+    height: 1rem;
+    margin: 0.25rem 2rem 0 0.5rem;
+    vertical-align: top;
+    background-color: #fff;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
+  }
+
+  .form-check-input[type='radio'] {
+    border-radius: 50%;
+    grid-column: 1 / 1;
+  }
+
+  .form-check-label {
+    grid-column: 2 / 3;
+  }
+
+  .btn {
+    display: inline-block;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #212529;
+    text-align: center;
+    text-decoration: none;
+    vertical-align: middle;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    background-color: transparent;
+    border: 1px solid transparent;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    border-radius: 0.25rem;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
+      border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    max-width: 9rem;
+  }
+
+  .btn-primary {
+    color: #fff;
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    grid-area: 2 / 3 / 2 / 3;
+    margin-left: 1rem;
   }
 `;
