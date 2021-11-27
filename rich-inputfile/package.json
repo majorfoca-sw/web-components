@@ -2,9 +2,9 @@
   "name": "rich-inputfile",
   "description": "Webcomponent rich-inputfile following open-wc recommendations",
   "license": "MIT",
-  "author": "rich-inputfile",
-  "version": "1.0.1",
-  "main": "rich-inputfile.js",
+  "author": "manufosela",
+  "version": "1.0.2",
+  "main": "index.js",
   "module": "rich-inputfile.js",
   "scripts": {
     "analyze": "cem analyze --litelement",
