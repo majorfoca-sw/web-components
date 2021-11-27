@@ -28,6 +28,7 @@ export const jsonAutoformStyles = css`
   }
 
   input,
+  rich-inputfile,
   textarea,
   select {
     grid-area: 2 / 2 / 2 / 3;

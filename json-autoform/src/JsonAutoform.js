@@ -1,5 +1,6 @@
 import { html, LitElement } from 'lit';
 import { ValidateForm } from 'automatic_form_validation';
+import 'rich-inputfile/rich-inputfile';
 import { jsonAutoformStyles } from './json-autoform-style.js';
 
 export class JsonAutoform extends LitElement {
@@ -80,21 +81,24 @@ export class JsonAutoform extends LitElement {
   }
 
   firstUpdated() {
-    if (super.firstUpdated) {
-      super.firstUpdated();
-    }
-    this.id = this.id || `json-autoform-${new Date().getTime()}`;
-    document.addEventListener('click', this._hideBocadillo.bind(this));
-    this.container = this.shadowRoot.querySelector('.container');
-    this._createBocadillo();
-    const componentCreatedEvent = new CustomEvent('wc-ready', {
-      detail: {
-        id: this.id,
-        componentName: this.tagName,
-        component: this,
-      },
+    customElements.whenDefined('rich-inputfile').then(() => {
+      console.log('ya!');
+      if (super.firstUpdated) {
+        super.firstUpdated();
+      }
+      this.id = this.id || `json-autoform-${new Date().getTime()}`;
+      document.addEventListener('click', this._hideBocadillo.bind(this));
+      this.container = this.shadowRoot.querySelector('.container');
+      this._createBocadillo();
+      const componentCreatedEvent = new CustomEvent('wc-ready', {
+        detail: {
+          id: this.id,
+          componentName: this.tagName,
+          component: this,
+        },
+      });
+      document.dispatchEvent(componentCreatedEvent);
     });
-    document.dispatchEvent(componentCreatedEvent);
   }
 
   _getContainer(modelElementName) {
@@ -213,6 +217,12 @@ export class JsonAutoform extends LitElement {
     return this._addValidation(input, modelElementName);
   }
 
+  _createRichInputfile(modelElementName) {
+    const divInputfile = document.createElement('div');
+
+    return this._addValidation(divInputfile, modelElementName);
+  }
+
   _createTextarea(modelElementName) {
     const textarea = document.createElement('textarea');
     textarea.classList.add('form-control');
@@ -327,11 +337,10 @@ export class JsonAutoform extends LitElement {
 
   _createFileField(modelElementName) {
     const label = this._createLabel(modelElementName);
-    const input = this._createInput(modelElementName, 'file');
     const divLayer = document.createElement('div');
     divLayer.classList.add('form-group');
     divLayer.appendChild(label);
-    divLayer.appendChild(input);
+    divLayer.innerHTML += `<rich-inputfile id="${modelElementName}" name="${modelElementName}" allowed-extensions="jpg,jpeg,png,gif,pdf,zip"></rich-inputfile>`;
     return divLayer;
   }
 
