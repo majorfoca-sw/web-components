@@ -3,7 +3,7 @@
   "description": "Webcomponent rich-inputfile following open-wc recommendations",
   "license": "MIT",
   "author": "rich-inputfile",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "main": "index.js",
   "module": "index.js",
   "scripts": {
