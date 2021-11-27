@@ -2,10 +2,10 @@
   "name": "json-autoform",
   "description": "Webcomponent json-autoform following open-wc recommendations",
   "license": "MIT",
-  "author": "json-autoform",
+  "author": "manufosela",
   "version": "1.0.0",
-  "main": "index.js",
-  "module": "index.js",
+  "main": "json-autoform.js",
+  "module": "json-autoform.js",
   "scripts": {
     "analyze": "cem analyze --litelement",
     "start": "web-dev-server",
@@ -18,7 +18,8 @@
   },
   "dependencies": {
     "automatic_form_validation": "^1.5.0",
-    "lit": "^2.0.2"
+    "lit": "^2.0.2",
+    "rich-inputfile": "^1.1.0"
   },
   "devDependencies": {
     "@custom-elements-manifest/analyzer": "^0.4.17",
