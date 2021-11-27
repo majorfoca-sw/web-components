@@ -21,16 +21,20 @@ export class RichInputfile extends LitElement {
         }
       },
       value: {
-        type: String
+        type: String,
       }, 
       file: {
-        type: String
+        type: String,
       },
       fileAllowed: {
-        type: Boolean
+        type: Boolean,
       },
       fileWidth: {
-        type: Number
+        type: Number,
+      },
+      showLabel: {
+        type: Boolean,
+        attribute: 'show-label',
       },
     };
   }
@@ -48,6 +52,7 @@ export class RichInputfile extends LitElement {
     this.allowedExtensions = [];
     this.fileAllowed = false;
     this.fileWidth = 50;
+    this.showLabel = false;
     this._fileValueChange = this._fileValueChange.bind(this);
     this._deleteValue = this._deleteValue.bind(this);
   }
@@ -99,11 +104,12 @@ export class RichInputfile extends LitElement {
   render() {
     const name = this.name.split('/').pop();
     const deleteBtnClass = (this.value !== '') ? '': 'invisible';
+    const labelClass = (!this.showLabel) ? 'invisible': '';
     const fileImg = (this.fileAllowed) ? html`<img src="${this.file}" alt="file ${name}" title="${this.value}" width="${this.fileWidth}">` : html`<div class='fakefile'><div></div></div>`;
     return html`
       <section class="wrapper">
         <div class="bloque1">
-          <label>${name}</label>
+          <label class="${labelClass}">${name}</label>
           <div style="display:flex">
             <label for="fileButton">Selecciona un fichero
             <input type="file" value="upload" id="fileButton">
