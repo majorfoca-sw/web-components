@@ -82,7 +82,6 @@ export class JsonAutoform extends LitElement {
 
   firstUpdated() {
     customElements.whenDefined('rich-inputfile').then(() => {
-      console.log('ya!');
       if (super.firstUpdated) {
         super.firstUpdated();
       }
@@ -215,12 +214,6 @@ export class JsonAutoform extends LitElement {
     input.setAttribute('value', '');
     input.classList.add('form-control');
     return this._addValidation(input, modelElementName);
-  }
-
-  _createRichInputfile(modelElementName) {
-    const divInputfile = document.createElement('div');
-
-    return this._addValidation(divInputfile, modelElementName);
   }
 
   _createTextarea(modelElementName) {
