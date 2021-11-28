@@ -51,6 +51,7 @@ export class RichInputfile extends LitElement {
     this.value = '';
     this.allowedExtensions = [];
     this.fileAllowed = false;
+    this.errorMsg = '';
     this.fileWidth = 50;
     this.showLabel = false;
     this._fileValueChange = this._fileValueChange.bind(this);
@@ -74,7 +75,15 @@ export class RichInputfile extends LitElement {
     changedProperties.forEach((oldValue, propName) => {
       if (propName === 'value') {
         const typesRegExp = new RegExp(`(?:${this.allowedExtensions.join('|')})$`);
-        this.fileAllowed = (this.value.search(typesRegExp) !== -1);
+        this.fileAllowed = (this.value !== '') ? (this.value.search(typesRegExp) !== -1) : false;
+        this.errorMsg = ``;
+        if (this.value !== '') {
+          if (!this.fileAllowed) {
+            this.errorMsg = `${this.value} is not allowed. Files allowed: ${this.allowedExtensions.join(',')}`;
+            this.value = '';
+            this.file = '';
+          }
+        }
       }
     });
   }
@@ -105,7 +114,7 @@ export class RichInputfile extends LitElement {
     const name = this.name.split('/').pop();
     const deleteBtnClass = (this.value !== '') ? '': 'invisible';
     const labelClass = (!this.showLabel) ? 'invisible': '';
-    const fileImg = (this.fileAllowed) ? html`<img src="${this.file}" alt="file ${name}" title="${this.value}" width="${this.fileWidth}">` : html`<div class='fakefile'><div></div></div>`;
+    const fileImg = (this.fileAllowed) ? html`<img src="${this.file}" alt="file ${name}" title="${this.value}" width="${this.fileWidth}">` : html``;
     return html`
       <section class="wrapper">
         <div class="bloque1">
@@ -122,7 +131,7 @@ export class RichInputfile extends LitElement {
         </div>
       </section>
       <div id="filelink"></div>
-      <div id="msg"></div>
+      ${this.errorMsg}
     `;
   }
 }
