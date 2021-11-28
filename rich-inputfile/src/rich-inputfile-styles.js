@@ -25,18 +25,11 @@ export const RichInputfileStyles = css`
         margin-bottom: 10px;
       }
       #msg {
-        border: 3px outset gray;
-        border-radius: 15px;
-        width: 300px;
-        height: 100px;
-        position: absolute;
-        background: gray;
-        display:none;
-        color: #FFF;
+        color: #F00;
         font-weight: bold;
         justify-content: center;
         align-items: center;
-        font-size: 1.2rem;
+        font-size: 1rem;
       }
       label {
         font-weight: bold;
